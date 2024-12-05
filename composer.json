@@ -8,6 +8,7 @@
         "logging"
     ],
     "homepage": "https://laminas.dev",
+    "abandoned": "monolog/monolog",
     "support": {
         "docs": "https://docs.laminas.dev/laminas-log/",
         "issues": "https://github.com/laminas/laminas-log/issues",
