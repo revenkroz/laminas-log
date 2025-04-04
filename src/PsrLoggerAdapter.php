@@ -64,19 +64,20 @@ class PsrLoggerAdapter extends PsrAbstractLogger
     /**
      * Logs with an arbitrary level.
      *
-     * @param mixed  $level
+     * @param mixed $level
      * @param string $message
-     * @param array  $context
-     * @return void
+     * @param array $context
      * @throws InvalidArgumentException If log level is not recognized.
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
-        if (! array_key_exists($level, $this->psrPriorityMap)) {
-            throw new InvalidArgumentException(sprintf(
-                '$level must be one of PSR-3 log levels; received %s',
-                var_export($level, true)
-            ));
+        if (!array_key_exists($level, $this->psrPriorityMap)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    '$level must be one of PSR-3 log levels; received %s',
+                    var_export($level, true)
+                )
+            );
         }
 
         $priority = $this->psrPriorityMap[$level];
