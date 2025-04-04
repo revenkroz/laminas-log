@@ -46,7 +46,6 @@ use const E_ERROR;
 use const E_NOTICE;
 use const E_PARSE;
 use const E_RECOVERABLE_ERROR;
-use const E_STRICT;
 use const E_USER_DEPRECATED;
 use const E_USER_ERROR;
 use const E_USER_NOTICE;
@@ -64,12 +63,19 @@ class Logger implements LoggerInterface
      * @const int defined from the BSD Syslog message severities
      */
     public const EMERG  = 0;
+
     public const ALERT  = 1;
+
     public const CRIT   = 2;
+
     public const ERR    = 3;
+
     public const WARN   = 4;
+
     public const NOTICE = 5;
+
     public const INFO   = 6;
+
     public const DEBUG  = 7;
 
     /**
@@ -90,7 +96,6 @@ class Logger implements LoggerInterface
         E_PARSE             => self::ERR,
         E_COMPILE_ERROR     => self::ERR,
         E_COMPILE_WARNING   => self::ERR,
-        E_STRICT            => self::DEBUG,
         E_DEPRECATED        => self::DEBUG,
         E_USER_DEPRECATED   => self::DEBUG,
     ];
@@ -168,7 +173,7 @@ class Logger implements LoggerInterface
      * - exceptionhandler: if true register this logger as exceptionhandler
      * - errorhandler: if true register this logger as errorhandler
      *
-     * @param  array|Traversable $options
+     * @param array|Traversable $options
      * @throws InvalidArgumentException
      */
     public function __construct($options = null)
@@ -180,11 +185,11 @@ class Logger implements LoggerInterface
             $options = ArrayUtils::iteratorToArray($options);
         }
 
-        if (! $options) {
+        if (!$options) {
             return;
         }
 
-        if (! is_array($options)) {
+        if (!is_array($options)) {
             throw new InvalidArgumentException(
                 'Options must be an array or an object implementing \Traversable '
             );
@@ -208,7 +213,7 @@ class Logger implements LoggerInterface
 
         if (isset($options['writers']) && is_array($options['writers'])) {
             foreach ($options['writers'] as $writer) {
-                if (! isset($writer['name'])) {
+                if (!isset($writer['name'])) {
                     throw new InvalidArgumentException('Options must contain a name for the writer');
                 }
 
@@ -221,7 +226,7 @@ class Logger implements LoggerInterface
 
         if (isset($options['processors']) && is_array($options['processors'])) {
             foreach ($options['processors'] as $processor) {
-                if (! isset($processor['name'])) {
+                if (!isset($processor['name'])) {
                     throw new InvalidArgumentException('Options must contain a name for the processor');
                 }
 
@@ -255,7 +260,7 @@ class Logger implements LoggerInterface
         foreach ($this->writers as $writer) {
             try {
                 $writer->shutdown();
-            } catch (Exception $e) {
+            } catch (Exception) {
             }
         }
     }
@@ -270,6 +275,7 @@ class Logger implements LoggerInterface
         if (null === $this->writerPlugins) {
             $this->setWriterPluginManager(new WriterPluginManager(new ServiceManager()));
         }
+
         return $this->writerPlugins;
     }
 
@@ -299,9 +305,9 @@ class Logger implements LoggerInterface
     /**
      * Add a writer to a logger
      *
-     * @param  string|WriterInterface $writer
-     * @param  int $priority
-     * @param  array|null $options
+     * @param string|WriterInterface $writer
+     * @param int $priority
+     * @param array|null $options
      * @return Logger
      * @throws InvalidArgumentException
      */
@@ -309,13 +315,16 @@ class Logger implements LoggerInterface
     {
         if (is_string($writer)) {
             $writer = $this->writerPlugin($writer, $options);
-        } elseif (! $writer instanceof Writer\WriterInterface) {
-            throw new InvalidArgumentException(sprintf(
-                'Writer must implement %s\Writer\WriterInterface; received "%s"',
-                __NAMESPACE__,
-                is_object($writer) ? get_class($writer) : gettype($writer)
-            ));
+        } elseif (!$writer instanceof Writer\WriterInterface) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Writer must implement %s\Writer\WriterInterface; received "%s"',
+                    __NAMESPACE__,
+                    get_debug_type($writer)
+                )
+            );
         }
+
         $this->writers->insert($writer, $priority);
 
         return $this;
@@ -340,12 +349,13 @@ class Logger implements LoggerInterface
     public function setWriters(SplPriorityQueue $writers)
     {
         foreach ($writers->toArray() as $writer) {
-            if (! $writer instanceof Writer\WriterInterface) {
+            if (!$writer instanceof Writer\WriterInterface) {
                 throw new InvalidArgumentException(
                     'Writers must be a SplPriorityQueue of Laminas\Log\Writer'
                 );
             }
         }
+
         $this->writers = $writers;
         return $this;
     }
@@ -360,13 +370,14 @@ class Logger implements LoggerInterface
         if (null === $this->processorPlugins) {
             $this->setProcessorPluginManager(new ProcessorPluginManager(new ServiceManager()));
         }
+
         return $this->processorPlugins;
     }
 
     /**
      * Set processor plugin manager
      *
-     * @param  string|ProcessorPluginManager $plugins
+     * @param string|ProcessorPluginManager $plugins
      * @return Logger
      * @throws InvalidArgumentException
      */
@@ -375,12 +386,15 @@ class Logger implements LoggerInterface
         if (is_string($plugins)) {
             $plugins = new $plugins();
         }
-        if (! $plugins instanceof ProcessorPluginManager) {
-            throw new InvalidArgumentException(sprintf(
-                'processor plugin manager must extend %s\ProcessorPluginManager; received %s',
-                __NAMESPACE__,
-                is_object($plugins) ? get_class($plugins) : gettype($plugins)
-            ));
+
+        if (!$plugins instanceof ProcessorPluginManager) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'processor plugin manager must extend %s\ProcessorPluginManager; received %s',
+                    __NAMESPACE__,
+                    get_debug_type($plugins)
+                )
+            );
         }
 
         $this->processorPlugins = $plugins;
@@ -402,9 +416,9 @@ class Logger implements LoggerInterface
     /**
      * Add a processor to a logger
      *
-     * @param  string|ProcessorInterface $processor
-     * @param  int $priority
-     * @param  array|null $options
+     * @param string|ProcessorInterface $processor
+     * @param int $priority
+     * @param array|null $options
      * @return Logger
      * @throws InvalidArgumentException
      */
@@ -412,12 +426,15 @@ class Logger implements LoggerInterface
     {
         if (is_string($processor)) {
             $processor = $this->processorPlugin($processor, $options);
-        } elseif (! $processor instanceof Processor\ProcessorInterface) {
-            throw new InvalidArgumentException(sprintf(
-                'Processor must implement Laminas\Log\ProcessorInterface; received "%s"',
-                is_object($processor) ? get_class($processor) : gettype($processor)
-            ));
+        } elseif (!$processor instanceof Processor\ProcessorInterface) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Processor must implement Laminas\Log\ProcessorInterface; received "%s"',
+                    get_debug_type($processor)
+                )
+            );
         }
+
         $this->processors->insert($processor, $priority);
 
         return $this;
@@ -436,9 +453,9 @@ class Logger implements LoggerInterface
     /**
      * Add a message as a log entry
      *
-     * @param  int $priority
-     * @param  mixed $message
-     * @param  array|Traversable $extra
+     * @param int $priority
+     * @param mixed $message
+     * @param array|Traversable $extra
      * @return Logger
      * @throws InvalidArgumentException If message can't be cast to string.
      * @throws InvalidArgumentException If extra can't be iterated over.
@@ -446,20 +463,23 @@ class Logger implements LoggerInterface
      */
     public function log($priority, $message, $extra = [])
     {
-        if (! is_int($priority) || ($priority < 0) || ($priority >= count($this->priorities))) {
-            throw new InvalidArgumentException(sprintf(
-                '$priority must be an integer >= 0 and < %d; received %s',
-                count($this->priorities),
-                var_export($priority, true)
-            ));
+        if (!is_int($priority) || ($priority < 0) || ($priority >= count($this->priorities))) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    '$priority must be an integer >= 0 and < %d; received %s',
+                    count($this->priorities),
+                    var_export($priority, true)
+                )
+            );
         }
-        if (is_object($message) && ! method_exists($message, '__toString')) {
+
+        if (is_object($message) && !method_exists($message, '__toString')) {
             throw new InvalidArgumentException(
                 '$message must implement magic __toString() method'
             );
         }
 
-        if (! is_array($extra) && ! $extra instanceof Traversable) {
+        if (!is_array($extra) && !$extra instanceof Traversable) {
             throw new InvalidArgumentException(
                 '$extra must be an array or implement Traversable'
             );
@@ -479,9 +499,9 @@ class Logger implements LoggerInterface
 
         $event = [
             'timestamp'    => $timestamp,
-            'priority'     => (int) $priority,
+            'priority'     => (int)$priority,
             'priorityName' => $this->priorities[$priority],
-            'message'      => (string) $message,
+            'message'      => (string)$message,
             'extra'        => $extra,
         ];
 
@@ -583,7 +603,7 @@ class Logger implements LoggerInterface
      *
      * @link http://www.php.net/manual/function.set-error-handler.php
      *
-     * @param  bool   $continueNativeHandler
+     * @param bool $continueNativeHandler
      * @return mixed  Returns result of set_error_handler
      */
     public static function registerErrorHandler(Logger $logger, $continueNativeHandler = false)
@@ -599,12 +619,9 @@ class Logger implements LoggerInterface
             function ($level, $message, $file, $line) use ($logger, $errorPriorityMap, $continueNativeHandler) {
                 $iniLevel = error_reporting();
 
-                if ($iniLevel & $level) {
-                    if (isset($errorPriorityMap[$level])) {
-                        $priority = $errorPriorityMap[$level];
-                    } else {
-                        $priority = Logger::INFO;
-                    }
+                if (($iniLevel & $level) !== 0) {
+                    $priority = $errorPriorityMap[$level] ?? Logger::INFO;
+
                     $logger->log($priority, $message, [
                         'errno' => $level,
                         'file'  => $file,
@@ -612,7 +629,7 @@ class Logger implements LoggerInterface
                     ]);
                 }
 
-                return ! $continueNativeHandler;
+                return !$continueNativeHandler;
             }
         );
 
@@ -650,7 +667,7 @@ class Logger implements LoggerInterface
 
             if (
                 null === $error
-                || ! in_array(
+                || !in_array(
                     $error['type'],
                     [
                         E_ERROR,
@@ -711,7 +728,7 @@ class Logger implements LoggerInterface
                     'line'  => $exception->getLine(),
                     'trace' => $exception->getTrace(),
                 ];
-                if (isset($exception->xdebug_message)) {
+                if (property_exists($exception, 'xdebug_message') && $exception->xdebug_message !== null) {
                     $extra['xdebug'] = $exception->xdebug_message;
                 }
 

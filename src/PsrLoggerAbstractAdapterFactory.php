@@ -24,7 +24,7 @@ class PsrLoggerAbstractAdapterFactory implements AbstractFactoryInterface
      */
     protected $configKey = 'psr_log';
 
-    private LoggerAbstractServiceFactory $loggerAbstractServiceFactory;
+    private readonly LoggerAbstractServiceFactory $loggerAbstractServiceFactory;
 
     public function __construct()
     {

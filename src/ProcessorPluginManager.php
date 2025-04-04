@@ -77,6 +77,7 @@ class ProcessorPluginManager extends AbstractPluginManager
      * @param mixed $instance
      * @throws InvalidServiceException
      */
+    #[\Override]
     public function validate($instance)
     {
         if (! $instance instanceof $this->instanceOf) {
@@ -84,7 +85,7 @@ class ProcessorPluginManager extends AbstractPluginManager
                 '%s can only create instances of %s; %s is invalid',
                 static::class,
                 $this->instanceOf,
-                is_object($instance) ? get_class($instance) : gettype($instance)
+                get_debug_type($instance)
             ));
         }
     }
@@ -101,10 +102,10 @@ class ProcessorPluginManager extends AbstractPluginManager
     {
         try {
             $this->validate($plugin);
-        } catch (InvalidServiceException $e) {
+        } catch (InvalidServiceException) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Plugin of type %s is invalid; must implement %s\Processor\ProcessorInterface',
-                is_object($plugin) ? get_class($plugin) : gettype($plugin),
+                get_debug_type($plugin),
                 __NAMESPACE__
             ));
         }

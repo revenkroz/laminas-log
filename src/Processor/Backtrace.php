@@ -72,6 +72,7 @@ class Backtrace implements ProcessorInterface
         if (isset($event['extra'])) {
             $extra = array_merge($origin, $event['extra']);
         }
+
         $event['extra'] = $extra;
 
         return $event;
@@ -106,7 +107,7 @@ class Backtrace implements ProcessorInterface
     protected function shouldIgnoreFrame($class)
     {
         foreach ($this->ignoredNamespaces as $ignoredNamespace) {
-            if (false !== strpos($class, $ignoredNamespace)) {
+            if (str_contains($class, (string) $ignoredNamespace)) {
                 return true;
             }
         }

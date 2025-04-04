@@ -110,7 +110,7 @@ class LoggerServiceFactory implements FactoryInterface
 
         foreach ($config['writers'] as $index => $writerConfig) {
             if (! is_array($writerConfig) && ! $writerConfig instanceof ArrayAccess) {
-                $type = is_object($writerConfig) ? get_class($writerConfig) : gettype($writerConfig);
+                $type = get_debug_type($writerConfig);
                 throw new InvalidArgumentException(
                     'config log.writers[] must contain array or ArrayAccess, ' . $type . ' provided'
                 );

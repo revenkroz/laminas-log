@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Laminas\Log\Processor;
 
-use function get_class;
 use function gettype;
 use function is_object;
 use function is_scalar;
 use function method_exists;
-use function strpos;
+use function str_contains;
 use function strtr;
 
 /**
@@ -23,9 +22,9 @@ class PsrPlaceholder implements ProcessorInterface
      * @param array $event event data
      * @return array event data
      */
-    public function process(array $event)
+    public function process(array $event): array
     {
-        if (false === strpos($event['message'], '{')) {
+        if (!str_contains((string)$event['message'], '{')) {
             return $event;
         }
 
@@ -41,7 +40,7 @@ class PsrPlaceholder implements ProcessorInterface
             }
 
             if (is_object($val)) {
-                $replacements['{' . $key . '}'] = '[object ' . get_class($val) . ']';
+                $replacements['{' . $key . '}'] = '[object ' . $val::class . ']';
                 continue;
             }
 

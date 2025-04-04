@@ -31,13 +31,6 @@ use function sprintf;
 class FingersCrossed extends AbstractWriter
 {
     /**
-     * The wrapped writer
-     *
-     * @var WriterInterface
-     */
-    protected $writer;
-
-    /**
      * Writer plugins
      *
      * @var WriterPluginManager
@@ -73,18 +66,19 @@ class FingersCrossed extends AbstractWriter
      * @param FilterInterface|int $filterOrPriority Filter or log priority which determines buffering of events
      * @param int $bufferSize Maximum buffer size
      */
-    public function __construct($writer, $filterOrPriority = null, $bufferSize = 0)
+    public function __construct(/**
+     * The wrapped writer
+     */
+    protected $writer, $filterOrPriority = null, $bufferSize = 0)
     {
-        $this->writer = $writer;
-
-        if ($writer instanceof Traversable) {
-            $writer = ArrayUtils::iteratorToArray($writer);
+        if ($this->writer instanceof Traversable) {
+            $this->writer = ArrayUtils::iteratorToArray($this->writer);
         }
 
-        if (is_array($writer)) {
-            $filterOrPriority = $writer['priority'] ?? null;
-            $bufferSize       = $writer['bufferSize'] ?? null;
-            $writer           = $writer['writer'] ?? null;
+        if (is_array($this->writer)) {
+            $filterOrPriority = $this->writer['priority'] ?? null;
+            $bufferSize       = $this->writer['bufferSize'] ?? null;
+            $this->writer           = $this->writer['writer'] ?? null;
         }
 
         if (null === $filterOrPriority) {
@@ -93,11 +87,12 @@ class FingersCrossed extends AbstractWriter
             $filterOrPriority = new PriorityFilter($filterOrPriority);
         }
 
-        if (is_array($writer) && isset($writer['name'])) {
-            $this->setWriter($writer['name'], $writer['options']);
+        if (is_array($this->writer) && isset($this->writer['name'])) {
+            $this->setWriter($this->writer['name'], $this->writer['options']);
         } else {
-            $this->setWriter($writer);
+            $this->setWriter($this->writer);
         }
+
         $this->addFilter($filterOrPriority);
         $this->bufferSize = $bufferSize;
     }
@@ -120,7 +115,7 @@ class FingersCrossed extends AbstractWriter
             throw new Exception\InvalidArgumentException(sprintf(
                 'Writer must implement %s\WriterInterface; received "%s"',
                 __NAMESPACE__,
-                is_object($writer) ? get_class($writer) : gettype($writer)
+                get_debug_type($writer)
             ));
         }
 
@@ -138,6 +133,7 @@ class FingersCrossed extends AbstractWriter
         if (null === $this->writerPlugins) {
             $this->setWriterPluginManager(new WriterPluginManager(new ServiceManager()));
         }
+
         return $this->writerPlugins;
     }
 
@@ -153,11 +149,12 @@ class FingersCrossed extends AbstractWriter
         if (is_string($plugins)) {
             $plugins = new $plugins();
         }
+
         if (! $plugins instanceof WriterPluginManager) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Writer plugin manager must extend %s\WriterPluginManager; received %s',
                 __NAMESPACE__,
-                is_object($plugins) ? get_class($plugins) : gettype($plugins)
+                get_debug_type($plugins)
             ));
         }
 
@@ -183,6 +180,7 @@ class FingersCrossed extends AbstractWriter
      * @param array $event log data event
      * @return void
      */
+    #[\Override]
     public function write(array $event)
     {
         $this->doWrite($event);
@@ -201,6 +199,7 @@ class FingersCrossed extends AbstractWriter
                 return false;
             }
         }
+
         return true;
     }
 
@@ -251,6 +250,7 @@ class FingersCrossed extends AbstractWriter
      * @param array|null $options (unused)
      * @return WriterInterface
      */
+    #[\Override]
     public function setFormatter($formatter, ?array $options = null)
     {
         return $this->writer;

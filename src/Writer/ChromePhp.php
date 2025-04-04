@@ -41,7 +41,7 @@ class ChromePhp extends AbstractWriter
             $instance = $instance['instance'] ?? null;
         }
 
-        if (! ($instance instanceof ChromePhpInterface || $instance === null)) {
+        if (!$instance instanceof ChromePhpInterface && $instance !== null) {
             throw new Exception\InvalidArgumentException(
                 'You must pass a valid Laminas\Log\Writer\ChromePhp\ChromePhpInterface'
             );
@@ -61,27 +61,13 @@ class ChromePhp extends AbstractWriter
     {
         $line = $this->formatter->format($event);
 
-        switch ($event['priority']) {
-            case Logger::EMERG:
-            case Logger::ALERT:
-            case Logger::CRIT:
-            case Logger::ERR:
-                $this->chromephp->error($line);
-                break;
-            case Logger::WARN:
-                $this->chromephp->warn($line);
-                break;
-            case Logger::NOTICE:
-            case Logger::INFO:
-                $this->chromephp->info($line);
-                break;
-            case Logger::DEBUG:
-                $this->chromephp->trace($line);
-                break;
-            default:
-                $this->chromephp->log($line);
-                break;
-        }
+        match ($event['priority']) {
+            Logger::EMERG, Logger::ALERT, Logger::CRIT, Logger::ERR => $this->chromephp->error($line),
+            Logger::WARN => $this->chromephp->warn($line),
+            Logger::NOTICE, Logger::INFO => $this->chromephp->info($line),
+            Logger::DEBUG => $this->chromephp->trace($line),
+            default => $this->chromephp->log($line),
+        };
     }
 
     /**
@@ -99,6 +85,7 @@ class ChromePhp extends AbstractWriter
         ) {
             $this->setChromePhp(new ChromePhpBridge());
         }
+
         return $this->chromephp;
     }
 

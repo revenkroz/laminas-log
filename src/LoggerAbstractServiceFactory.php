@@ -63,6 +63,7 @@ class LoggerAbstractServiceFactory extends LoggerServiceFactory implements Abstr
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
         $config = $this->getConfig($container);
@@ -94,7 +95,7 @@ class LoggerAbstractServiceFactory extends LoggerServiceFactory implements Abstr
      */
     protected function getConfig(ContainerInterface $services)
     {
-        if (isset($this->config)) {
+        if ($this->config !== null) {
             return $this->config;
         }
 

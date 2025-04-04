@@ -35,15 +35,18 @@ class Validator implements FilterInterface
         if ($validator instanceof Traversable && ! $validator instanceof LaminasValidator) {
             $validator = iterator_to_array($validator);
         }
+
         if (is_array($validator)) {
             $validator = $validator['validator'] ?? null;
         }
+
         if (! $validator instanceof LaminasValidator) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Parameter of type %s is invalid; must implement Laminas\Validator\ValidatorInterface',
-                is_object($validator) ? get_class($validator) : gettype($validator)
+                get_debug_type($validator)
             ));
         }
+
         $this->validator = $validator;
     }
 

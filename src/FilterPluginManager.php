@@ -80,6 +80,7 @@ class FilterPluginManager extends AbstractPluginManager
      * @param mixed $instance
      * @throws InvalidServiceException
      */
+    #[\Override]
     public function validate($instance)
     {
         if (! $instance instanceof $this->instanceOf) {
@@ -87,7 +88,7 @@ class FilterPluginManager extends AbstractPluginManager
                 '%s can only create instances of %s; %s is invalid',
                 static::class,
                 $this->instanceOf,
-                is_object($instance) ? get_class($instance) : gettype($instance)
+                get_debug_type($instance)
             ));
         }
     }
@@ -104,10 +105,10 @@ class FilterPluginManager extends AbstractPluginManager
     {
         try {
             $this->validate($plugin);
-        } catch (InvalidServiceException $e) {
+        } catch (InvalidServiceException) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Plugin of type %s is invalid; must implement %s\Filter\FilterInterface',
-                is_object($plugin) ? get_class($plugin) : gettype($plugin),
+                get_debug_type($plugin),
                 __NAMESPACE__
             ));
         }

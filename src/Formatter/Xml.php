@@ -66,15 +66,15 @@ class Xml implements FormatterInterface
                 'rootElement' => array_shift($args),
             ];
 
-            if (! empty($args)) {
+            if ($args !== []) {
                 $options['elementMap'] = array_shift($args);
             }
 
-            if (! empty($args)) {
+            if ($args !== []) {
                 $options['encoding'] = array_shift($args);
             }
 
-            if (! empty($args)) {
+            if ($args !== []) {
                 $options['dateTimeFormat'] = array_shift($args);
             }
         }
@@ -144,6 +144,7 @@ class Xml implements FormatterInterface
         if (null === $this->escaper) {
             $this->setEscaper(new Escaper($this->getEncoding()));
         }
+
         return $this->escaper;
     }
 
@@ -178,7 +179,7 @@ class Xml implements FormatterInterface
             if (
                 empty($value)
                 || is_scalar($value)
-                || ((is_array($value) || $value instanceof Traversable) && $key === "extra")
+                || ((is_iterable($value)) && $key === "extra")
                 || (is_object($value) && method_exists($value, '__toString'))
             ) {
                 if ($key === "message") {
@@ -189,7 +190,7 @@ class Xml implements FormatterInterface
                     continue;
                 }
 
-                if ($key === "extra" && (is_array($value) || $value instanceof Traversable)) {
+                if ($key === "extra" && (is_iterable($value))) {
                     $elt->appendChild($this->buildElementTree($dom, $dom->createElement('extra'), $value));
 
                     continue;
@@ -212,7 +213,7 @@ class Xml implements FormatterInterface
      */
     protected function buildElementTree(DOMDocument $doc, DOMElement $rootElement, $mixedData)
     {
-        if (! (is_array($mixedData) || $mixedData instanceof Traversable)) {
+        if (!is_array($mixedData) && !$mixedData instanceof Traversable) {
             return $rootElement;
         }
 
@@ -222,7 +223,7 @@ class Xml implements FormatterInterface
                 continue;
             }
 
-            if ($value instanceof Traversable || is_array($value)) {
+            if (is_iterable($value)) {
                 // current value is an array, start recursion
                 $rootElement->appendChild($this->buildElementTree($doc, $doc->createElement($key), $value));
 
@@ -232,7 +233,7 @@ class Xml implements FormatterInterface
             if (is_object($value) && ! method_exists($value, '__toString')) {
                 // object does not support __toString() method, manually convert the value
                 $value = $this->getEscaper()->escapeHtml(
-                    '"Object" of type ' . get_class($value) . " does not support __toString() method"
+                    '"Object" of type ' . $value::class . " does not support __toString() method"
                 );
             } elseif ($value) {
                 $value = $this->getEscaper()->escapeHtml((string) $value);
@@ -246,7 +247,7 @@ class Xml implements FormatterInterface
 
             try {
                 $rootElement->appendChild(new DOMElement($key, empty($value) ? null : (string) $value));
-            } catch (DOMException $e) {
+            } catch (DOMException) {
                 // the input name is not valid, go one.
                 continue;
             }

@@ -73,7 +73,7 @@ class Psr extends AbstractWriter
 
         parent::__construct($options);
 
-        if (null === $this->logger) {
+        if (!$this->logger instanceof \Psr\Log\LoggerInterface) {
             $this->setLogger(new NullLogger());
         }
     }

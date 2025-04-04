@@ -29,9 +29,11 @@ class SuppressFilter implements FilterInterface
         if ($suppress instanceof Traversable) {
             $suppress = iterator_to_array($suppress);
         }
+
         if (is_array($suppress)) {
             $suppress = $suppress['suppress'] ?? false;
         }
+
         if (! is_bool($suppress)) {
             throw new Exception\InvalidArgumentException(
                 sprintf('Suppress must be a boolean; received "%s"', gettype($suppress))

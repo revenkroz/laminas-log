@@ -37,14 +37,14 @@ class Module
         $serviceListener->addServiceManager(
             'LogProcessorManager',
             'log_processors',
-            'Laminas\ModuleManager\Feature\LogProcessorProviderInterface',
+            \Laminas\ModuleManager\Feature\LogProcessorProviderInterface::class,
             'getLogProcessorConfig'
         );
 
         $serviceListener->addServiceManager(
             'LogWriterManager',
             'log_writers',
-            'Laminas\ModuleManager\Feature\LogWriterProviderInterface',
+            \Laminas\ModuleManager\Feature\LogWriterProviderInterface::class,
             'getLogWriterConfig'
         );
 

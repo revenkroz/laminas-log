@@ -14,6 +14,7 @@ class ReferenceId extends RequestId implements ProcessorInterface
      * @param array $event event data
      * @return array event data
      */
+    #[\Override]
     public function process(array $event)
     {
         if (isset($event['extra']['referenceId'])) {

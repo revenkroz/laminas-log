@@ -67,6 +67,7 @@ class Timestamp implements FilterInterface
                     gettype($value)
                 ));
             }
+
             if (! is_string($dateFormatChar)) {
                 throw new Exception\InvalidArgumentException(sprintf(
                     'Date format character must be supplied as string; received "%s"',
@@ -87,7 +88,7 @@ class Timestamp implements FilterInterface
             )
         ) {
             throw new Exception\InvalidArgumentException(
-                "Unsupported comparison operator: '$operator'"
+                sprintf("Unsupported comparison operator: '%s'", $operator)
             );
         }
 

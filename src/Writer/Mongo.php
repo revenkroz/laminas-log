@@ -60,6 +60,7 @@ class Mongo extends AbstractWriter
             // Configuration may be multi-dimensional due to save options
             $mongo = ArrayUtils::iteratorToArray($mongo);
         }
+
         if (is_array($mongo)) {
             parent::__construct($mongo);
             $saveOptions = $mongo['save_options'] ?? [];
@@ -76,10 +77,10 @@ class Mongo extends AbstractWriter
             throw new Exception\InvalidArgumentException('The database parameter cannot be empty');
         }
 
-        if (! ($mongo instanceof MongoClient || $mongo instanceof MongoC)) {
+        if (!$mongo instanceof MongoClient && !$mongo instanceof MongoC) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Parameter of type %s is invalid; must be MongoClient or Mongo',
-                is_object($mongo) ? get_class($mongo) : gettype($mongo)
+                get_debug_type($mongo)
             ));
         }
 
@@ -94,6 +95,7 @@ class Mongo extends AbstractWriter
      * @param array|null $options (unused)
      * @return WriterInterface
      */
+    #[\Override]
     public function setFormatter($formatter, ?array $options = null)
     {
         return $this;

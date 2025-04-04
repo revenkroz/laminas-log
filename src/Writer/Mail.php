@@ -92,11 +92,13 @@ class Mail extends AbstractWriter
             if (isset($mail['subject_prepend_text'])) {
                 $this->setSubjectPrependText($mail['subject_prepend_text']);
             }
+
             $transport = $mail['transport'] ?? null;
             $mail      = $mail['mail'] ?? null;
             if (is_array($mail)) {
                 $mail = MailMessageFactory::getInstance($mail);
             }
+
             if (is_array($transport)) {
                 $transport = Transport\Factory::create($transport);
             }
@@ -106,21 +108,24 @@ class Mail extends AbstractWriter
         if (! $mail instanceof MailMessage) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Mail parameter of type %s is invalid; must be of type Laminas\Mail\Message',
-                is_object($mail) ? get_class($mail) : gettype($mail)
+                get_debug_type($mail)
             ));
         }
+
         $this->mail = $mail;
 
         // Ensure we have a valid mail transport
         if (null === $transport) {
             $transport = new Transport\Sendmail();
         }
+
         if (! $transport instanceof Transport\TransportInterface) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Transport parameter of type %s is invalid; must be of type Laminas\Mail\Transport\TransportInterface',
-                is_object($transport) ? get_class($transport) : gettype($transport)
+                get_debug_type($transport)
             ));
         }
+
         $this->setTransport($transport);
 
         if ($this->formatter === null) {
@@ -183,7 +188,7 @@ class Mail extends AbstractWriter
     {
         // If there are events to mail, use them as message body.  Otherwise,
         // there is no mail to be sent.
-        if (empty($this->eventsToMail)) {
+        if ($this->eventsToMail === []) {
             return;
         }
 
@@ -191,7 +196,7 @@ class Mail extends AbstractWriter
             // Tack on the summary of entries per-priority to the subject
             // line and set it on the Laminas\Mail object.
             $numEntries = $this->getFormattedNumEntriesPerPriority();
-            $this->mail->setSubject("{$this->subjectPrependText} ({$numEntries})");
+            $this->mail->setSubject(sprintf('%s (%s)', $this->subjectPrependText, $numEntries));
         }
 
         // Always provide events to mail as plaintext.
@@ -202,12 +207,12 @@ class Mail extends AbstractWriter
         // stack frame.
         try {
             $this->transport->send($this->mail);
-        } catch (TransportException\ExceptionInterface $e) {
+        } catch (TransportException\ExceptionInterface $exception) {
             trigger_error(
                 "unable to send log entries via email; "
-                . "message = {$e->getMessage()}; "
-                . "code = {$e->getCode()}; "
-                . "exception class = " . get_class($e),
+                . sprintf('message = %s; ', $exception->getMessage())
+                . sprintf('code = %d; ', $exception->getCode())
+                . "exception class = " . $exception::class,
                 E_USER_WARNING
             );
         }
@@ -224,7 +229,7 @@ class Mail extends AbstractWriter
         $strings = [];
 
         foreach ($this->numEntriesPerPriority as $priority => $numEntries) {
-            $strings[] = "{$priority}={$numEntries}";
+            $strings[] = sprintf('%s=%s', $priority, $numEntries);
         }
 
         return implode(', ', $strings);

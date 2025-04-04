@@ -36,6 +36,7 @@ class ZendMonitor extends AbstractWriter
         if (! function_exists('monitor_custom_event')) {
             $this->isEnabled = false;
         }
+
         if (function_exists('zend_monitor_custom_event')) {
             $this->isZendServer = true;
         }
@@ -61,6 +62,7 @@ class ZendMonitor extends AbstractWriter
      * @param array $event log data event
      * @return void
      */
+    #[\Override]
     public function write(array $event)
     {
         if (! $this->isEnabled()) {
@@ -82,7 +84,7 @@ class ZendMonitor extends AbstractWriter
         $message  = $event['message'];
         unset($event['priority'], $event['message']);
 
-        if (! empty($event)) {
+        if ($event !== []) {
             if ($this->isZendServer) {
                 // On Zend Server; third argument should be the event
                 zend_monitor_custom_event($priority, $message, $event);

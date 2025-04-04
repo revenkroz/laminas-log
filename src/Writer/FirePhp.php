@@ -64,27 +64,13 @@ class FirePhp extends AbstractWriter
 
         [$line, $label] = $this->formatter->format($event);
 
-        switch ($event['priority']) {
-            case Logger::EMERG:
-            case Logger::ALERT:
-            case Logger::CRIT:
-            case Logger::ERR:
-                $firephp->error($line, $label);
-                break;
-            case Logger::WARN:
-                $firephp->warn($line, $label);
-                break;
-            case Logger::NOTICE:
-            case Logger::INFO:
-                $firephp->info($line, $label);
-                break;
-            case Logger::DEBUG:
-                $firephp->trace($line);
-                break;
-            default:
-                $firephp->log($line, $label);
-                break;
-        }
+        match ($event['priority']) {
+            Logger::EMERG, Logger::ALERT, Logger::CRIT, Logger::ERR => $firephp->error($line, $label),
+            Logger::WARN => $firephp->warn($line, $label),
+            Logger::NOTICE, Logger::INFO => $firephp->info($line, $label),
+            Logger::DEBUG => $firephp->trace($line),
+            default => $firephp->log($line, $label),
+        };
     }
 
     /**

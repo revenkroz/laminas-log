@@ -36,11 +36,13 @@ class Priority implements FilterInterface
         if ($priority instanceof Traversable) {
             $priority = iterator_to_array($priority);
         }
+
         if (is_array($priority)) {
             $operator = $priority['operator'] ?? null;
             $priority = $priority['priority'] ?? null;
         }
-        if (! is_int($priority) && ! ctype_digit($priority)) {
+
+        if (! is_int($priority) && ! ctype_digit((string) $priority)) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Priority must be a number, received "%s"',
                 gettype($priority)

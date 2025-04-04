@@ -102,6 +102,7 @@ class Stream extends AbstractWriter
                 touch($streamOrUrl);
                 chmod($streamOrUrl, $filePermissions);
             }
+
             $this->stream = fopen($streamOrUrl, $mode, false);
             $error        = ErrorHandler::stop();
         }

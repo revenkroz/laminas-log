@@ -142,8 +142,8 @@ class Db extends AbstractWriter
     {
         $keys = array_keys($fields);
         return 'INSERT INTO ' . $this->db->platform->quoteIdentifier($this->tableName) . ' ('
-            . implode(",", array_map([$this->db->platform, 'quoteIdentifier'], $keys)) . ') VALUES ('
-            . implode(",", array_map([$this->db->driver, 'formatParameterName'], $keys)) . ')';
+            . implode(",", array_map($this->db->platform->quoteIdentifier(...), $keys)) . ') VALUES ('
+            . implode(",", array_map($this->db->driver->formatParameterName(...), $keys)) . ')';
     }
 
     /**
@@ -155,7 +155,7 @@ class Db extends AbstractWriter
      */
     protected function mapEventIntoColumn(array $event, ?array $columnMap = null)
     {
-        if (empty($event)) {
+        if ($event === []) {
             return [];
         }
 
@@ -176,6 +176,7 @@ class Db extends AbstractWriter
                 $data[$columnMap[$name]] = $value;
             }
         }
+
         return $data;
     }
 
@@ -187,7 +188,7 @@ class Db extends AbstractWriter
      */
     protected function eventIntoColumn(array $event)
     {
-        if (empty($event)) {
+        if ($event === []) {
             return [];
         }
 
@@ -206,6 +207,7 @@ class Db extends AbstractWriter
                 $data[$name] = $value;
             }
         }
+
         return $data;
     }
 }

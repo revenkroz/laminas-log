@@ -38,13 +38,14 @@ class ExceptionHandler implements FormatterInterface
         if (! empty($event['extra']['trace'])) {
             $outputTrace = '';
             foreach ($event['extra']['trace'] as $trace) {
-                $outputTrace .= "File  : {$trace['file']}\n"
-                              . "Line  : {$trace['line']}\n"
-                              . "Func  : {$trace['function']}\n"
-                              . "Class : {$trace['class']}\n"
+                $outputTrace .= sprintf('File  : %s%s', $trace['file'], PHP_EOL)
+                              . sprintf('Line  : %s%s', $trace['line'], PHP_EOL)
+                              . sprintf('Func  : %s%s', $trace['function'], PHP_EOL)
+                              . sprintf('Class : %s%s', $trace['class'], PHP_EOL)
                               . "Type  : " . $this->getType($trace['type']) . "\n"
                               . "Args  : " . print_r($trace['args'], true) . "\n";
             }
+
             $output .= "\n[Trace]\n" . $outputTrace;
         }
 
@@ -76,13 +77,10 @@ class ExceptionHandler implements FormatterInterface
      */
     protected function getType($type)
     {
-        switch ($type) {
-            case "::":
-                return "static";
-            case "->":
-                return "method";
-            default:
-                return $type;
-        }
+        return match ($type) {
+            "::" => "static",
+            "->" => "method",
+            default => $type,
+        };
     }
 }

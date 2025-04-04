@@ -26,7 +26,7 @@ class Mock extends AbstractWriter
      * @param array $event event data
      * @return void
      */
-    public function doWrite(array $event)
+    protected function doWrite(array $event)
     {
         $this->events[] = $event;
     }

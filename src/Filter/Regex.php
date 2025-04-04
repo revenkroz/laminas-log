@@ -36,9 +36,11 @@ class Regex implements FilterInterface
         if ($regex instanceof Traversable) {
             $regex = iterator_to_array($regex);
         }
+
         if (is_array($regex)) {
             $regex = $regex['regex'] ?? null;
         }
+
         ErrorHandler::start(E_WARNING);
         $result = preg_match($regex, '');
         $error  = ErrorHandler::stop();
@@ -48,6 +50,7 @@ class Regex implements FilterInterface
                 $regex
             ), 0, $error);
         }
+
         $this->regex = $regex;
     }
 
@@ -63,6 +66,7 @@ class Regex implements FilterInterface
         if (is_array($event['message'])) {
             $message = var_export($message, true);
         }
-        return preg_match($this->regex, $message) > 0;
+
+        return preg_match($this->regex, (string) $message) > 0;
     }
 }

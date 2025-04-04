@@ -23,6 +23,7 @@ class ErrorHandler extends Simple
      * @param  array $event
      * @return string
      */
+    #[\Override]
     public function format($event)
     {
         $output = $this->format;
@@ -32,7 +33,7 @@ class ErrorHandler extends Simple
         }
 
         foreach ($this->buildReplacementsFromArray($event) as $name => $value) {
-            $output = str_replace("%$name%", (string) $value, $output);
+            $output = str_replace(sprintf('%%%s%%', $name), (string) $value, $output);
         }
 
         return $output;
@@ -54,18 +55,18 @@ class ErrorHandler extends Simple
             if ($value === null) {
                 continue;
             }
+
             if (! is_array($value)) {
                 if ($key === null) {
                     $result[$nextIndex] = $value;
-                } else {
-                    if (! is_object($value) || method_exists($value, "__toString")) {
-                        $result[$nextIndex] = $value;
-                    }
+                } elseif (! is_object($value) || method_exists($value, "__toString")) {
+                    $result[$nextIndex] = $value;
                 }
             } else {
                 $result = array_merge($result, $this->buildReplacementsFromArray($value, $nextIndex));
             }
         }
+
         return $result;
     }
 }

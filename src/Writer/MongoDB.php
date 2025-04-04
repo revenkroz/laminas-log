@@ -76,7 +76,7 @@ class MongoDB extends AbstractWriter
         if (! $manager instanceof Manager) {
             throw new Exception\InvalidArgumentException(sprintf(
                 'Parameter of type %s is invalid; must be MongoDB\Driver\Manager',
-                is_object($manager) ? get_class($manager) : gettype($manager)
+                get_debug_type($manager)
             ));
         }
 
@@ -103,6 +103,7 @@ class MongoDB extends AbstractWriter
      * @param array|null $options (unused)
      * @return WriterInterface
      */
+    #[\Override]
     public function setFormatter($formatter, ?array $options = null)
     {
         return $this;

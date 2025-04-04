@@ -60,6 +60,7 @@ class Simple extends Base
      * @param array $event event data
      * @return string formatted line to write to the log
      */
+    #[\Override]
     public function format($event)
     {
         $output = $this->format;
@@ -72,15 +73,17 @@ class Simple extends Base
                 // Don't print an empty array
                 $value = '';
             }
-            $output = str_replace("%$name%", (string) $value, $output);
+
+            $output = str_replace(sprintf('%%%s%%', $name), (string) $value, $output);
         }
 
         if (
             array_key_exists('extra', $event) && empty($event['extra'])
-            && false !== strpos($this->format, '%extra%')
+            && str_contains($this->format, '%extra%')
         ) {
             $output = rtrim($output, ' ');
         }
+
         return $output;
     }
 }
