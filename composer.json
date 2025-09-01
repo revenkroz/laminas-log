@@ -1,5 +1,5 @@
 {
-  "name": "jield-webdev/laminas-log",
+  "name": "laminas/laminas-log",
   "description": "Robust, composite logger with filtering, formatting, and PSR-3 support",
   "license": "BSD-3-Clause",
   "keywords": [
